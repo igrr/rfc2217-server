@@ -1,0 +1,10 @@
+paths = [
+    "examples",
+]
+recursive = true
+config = [
+    "=default",
+]
+build_dir = "build_@t_@w"
+manifest_file = ".build-test-rules.yml"
+check_warnings = true

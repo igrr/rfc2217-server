@@ -1,0 +1,31 @@
+name: 'build'
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    types: [opened, reopened, synchronize]
+  schedule:
+    - cron: '0 1 * * 6'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        idf_ver: ["release-v5.3", "latest"]
+    runs-on: ubuntu-22.04
+    container: espressif/idf:${{ matrix.idf_ver }}
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    - name: Install idf-build-apps
+      shell: bash
+      run: |
+        . ${IDF_PATH}/export.sh
+        python3 -m pip install idf-build-apps==2.4.3
+    - name: Build examples
+      shell: bash
+      run: |
+        . ${IDF_PATH}/export.sh
+        idf-build-apps build

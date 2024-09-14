@@ -1,13 +1,14 @@
-#include "rfc2217_server.h"
-#include "pthread.h"
 #include <stdbool.h>
 #include <stdlib.h>
-#include <netinet/in.h>
-#include <errno.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include "esp_log.h"
 #include "esp_pthread.h"
+#include "rfc2217_server.h"
 
 static const char *TAG = "rfc2217_server";
 // telnet
@@ -526,7 +527,7 @@ static void process_subnegotiation(rfc2217_server_t server)
         if (server->config.on_baudrate) {
             new_baudrate = server->config.on_baudrate(server->config.ctx, baudrate);
         }
-        ESP_LOGD(TAG, "Set baudrate: requested %d, accepted %d", baudrate, baudrate);
+        ESP_LOGD(TAG, "Set baudrate: requested %" PRIu32 ", accepted %" PRIu32, baudrate, baudrate);
         uint8_t data[4] = {new_baudrate >> 24, new_baudrate >> 16, new_baudrate >> 8, new_baudrate};
         rfc2217_send_subnegotiation(server, T_SERVER_SET_BAUDRATE, data, 4);
     } else if (subnegotiation == T_SET_DATASIZE) {

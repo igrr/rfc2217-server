@@ -42,7 +42,6 @@ void app_main(void)
         .on_purge = NULL,
         .on_data_received = on_data_received,
         .port = 3333,
-        .max_clients = 1,
         .task_stack_size = 4096,
         .task_priority = 5,
         .task_core_id = 0

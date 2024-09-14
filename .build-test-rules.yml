@@ -1,0 +1,4 @@
+examples/loopback:
+  enable:
+    - if: IDF_TARGET in ["esp32", "esp32c3"]
+    - if: IDF_TARGET == "linux" and IDF_VERSION >= "5.4.0"

@@ -4,5 +4,5 @@ set(COMPONENTS main)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
-project(rfc2217-server)
+project(rfc2217-server-loopback)
 
