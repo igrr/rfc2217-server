@@ -8,6 +8,8 @@ With this library, you can build a "remote serial port" type of device using an 
 
 ## Examples
 
+- `loopback` example sets up an RFC2217 server and echoes back any data received.
+
 ## Using the component
 
 If you have an existing ESP-IDF project you can run the following command to install the component:
