@@ -1,0 +1,9 @@
+build
+managed_components
+doxygen
+sdkconfig
+sdkconfig.old
+dependencies.lock
+.cache
+.clangd
+*.code-workspace

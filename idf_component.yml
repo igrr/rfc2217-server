@@ -1,0 +1,9 @@
+description: RFC2217 server library for ESP-IDF
+
+url: https://github.com/igrr/rfc2217-server.git
+issues: https://github.com/igrr/rfc2217-server/issues
+documentation: https://github.com/igrr/rfc2217-server/tree/main/README.md
+repository: https://github.com/igrr/rfc2217-server.git
+
+dependencies:
+  idf: ">=5.1.0"
