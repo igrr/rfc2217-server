@@ -9,6 +9,7 @@ With this library, you can build a "remote serial port" type of device using an 
 ## Examples
 
 - `loopback` example sets up an RFC2217 server and echoes back any data received.
+- `uart` is an example of an RFC2217-to-UART bridge.
 
 ## Using the component
 

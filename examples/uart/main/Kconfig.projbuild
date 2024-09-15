@@ -1,0 +1,21 @@
+menu "RFC2217 UART Example Configuration"
+
+    config EXAMPLE_UART_PORT_NUM
+        int "UART port number"
+        default 1
+        help
+            Select the UART port number to use for the RFC2217 UART example.
+
+    config EXAMPLE_UART_TX_GPIO
+        int "UART TX GPIO"
+        default 4
+        help
+            Select the GPIO number to use as the UART TX.
+
+    config EXAMPLE_UART_RX_GPIO
+        int "UART RX GPIO"
+        default 5
+        help
+            Select the GPIO number to use as the UART RX.
+
+endmenu
