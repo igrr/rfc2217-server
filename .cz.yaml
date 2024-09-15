@@ -1,8 +1,7 @@
 ---
 commitizen:
-  bump_message: 'change(console): release $new_version'
+  bump_message: 'change(version): release $new_version'
   tag_format: v$version
   version_provider: scm
   update_changelog_on_bump: true
   major_version_zero: true
-
