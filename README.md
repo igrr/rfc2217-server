@@ -1,6 +1,6 @@
 # RFC2217 server library for ESP-IDF
 
-[![Component Registry](https://components.espressif.com/components/igrr/rfc2217-server/badge.svg)](https://components.espressif.com/components/igrr/rfc2217-server)
+[![Component Registry](https://components.espressif.com/components/igrr/rfc2217-server/badge.svg)](https://components.espressif.com/components/igrr/rfc2217-server) [![Example build](https://github.com/igrr/rfc2217-server/actions/workflows/build_examples.yml/badge.svg)](https://github.com/igrr/rfc2217-server/actions/workflows/build_examples.yml)
 
 This library provides an RFC2217 server for ESP-IDF. RFC2217 is one of the protocols for accessing serial ports remotely over network. RFC2217 is based on Telnet, extending it with a few commands related to serial port settings.
 
