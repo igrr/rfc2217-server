@@ -14,12 +14,18 @@ typedef struct rfc2217_server_s *rfc2217_server_t;
 
 /**
  * @brief RFC2217 control signal definitions
+ * FIXME: split this into separate enums and callbacks
  */
 typedef enum {
-    RFC2217_CONTROL_NONE = 0,       //!< No control signals asserted
-    RFC2217_CONTROL_RTS = 1,        //!< RTS signal asserted
-    RFC2217_CONTROL_DTR = 2,        //!< DTR signal asserted
-    RFC2217_CONTROL_RTS_DTR = 3     //!< RTS and DTR signals asserted
+    RFC2217_CONTROL_SET_NO_FLOW_CONTROL = 1,  //!< Set no flow control
+    RFC2217_CONTROL_SET_XON_XOFF_FLOW_CONTROL = 2,  //!< Set XON/XOFF flow control
+    RFC2217_CONTROL_SET_HARDWARE_FLOW_CONTROL = 3,  //!< Set hardware flow control
+    RFC2217_CONTROL_SET_BREAK = 5,  //!< Set break signal
+    RFC2217_CONTROL_CLEAR_BREAK = 6,    //!< Clear break signal
+    RFC2217_CONTROL_SET_DTR = 8,    //!< Set DTR signal
+    RFC2217_CONTROL_CLEAR_DTR = 9,  //!< Clear DTR signal
+    RFC2217_CONTROL_SET_RTS = 11,   //!< Set RTS signal
+    RFC2217_CONTROL_CLEAR_RTS = 12  //!< Clear RTS signal
 } rfc2217_control_t;
 
 /**

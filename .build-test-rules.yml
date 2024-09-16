@@ -6,3 +6,7 @@ examples/loopback:
 examples/uart:
   enable:
     - if: IDF_TARGET in ["esp32s3", "esp32c6"]
+
+examples/usb_cdc:
+  enable:
+    - if: IDF_TARGET in ["esp32s3", "esp32p4"]

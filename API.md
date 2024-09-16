@@ -14,7 +14,7 @@
 
 | Type | Name |
 | ---: | :--- |
-| enum  | [**rfc2217\_control\_t**](#enum-rfc2217_control_t)  <br>_RFC2217 control signal definitions._ |
+| enum  | [**rfc2217\_control\_t**](#enum-rfc2217_control_t)  <br>_RFC2217 control signal definitions FIXME: split this into separate enums and callbacks._ |
 | typedef unsigned(\* | [**rfc2217\_on\_baudrate\_t**](#typedef-rfc2217_on_baudrate_t)  <br>_baudrate change request callback_ |
 | typedef void(\* | [**rfc2217\_on\_client\_connected\_t**](#typedef-rfc2217_on_client_connected_t)  <br>_callback on client connection_ |
 | typedef void(\* | [**rfc2217\_on\_client\_disconnected\_t**](#typedef-rfc2217_on_client_disconnected_t)  <br>_callback on client disconnection_ |
@@ -40,13 +40,18 @@
 
 ### enum `rfc2217_control_t`
 
-_RFC2217 control signal definitions._
+_RFC2217 control signal definitions FIXME: split this into separate enums and callbacks._
 ```c
 enum rfc2217_control_t {
-    RFC2217_CONTROL_NONE = 0,
-    RFC2217_CONTROL_RTS = 1,
-    RFC2217_CONTROL_DTR = 2,
-    RFC2217_CONTROL_RTS_DTR = 3
+    RFC2217_CONTROL_SET_NO_FLOW_CONTROL = 1,
+    RFC2217_CONTROL_SET_XON_XOFF_FLOW_CONTROL = 2,
+    RFC2217_CONTROL_SET_HARDWARE_FLOW_CONTROL = 3,
+    RFC2217_CONTROL_SET_BREAK = 5,
+    RFC2217_CONTROL_CLEAR_BREAK = 6,
+    RFC2217_CONTROL_SET_DTR = 8,
+    RFC2217_CONTROL_CLEAR_DTR = 9,
+    RFC2217_CONTROL_SET_RTS = 11,
+    RFC2217_CONTROL_CLEAR_RTS = 12
 };
 ```
 

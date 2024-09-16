@@ -1,0 +1,10 @@
+dependencies:
+  igrr/rfc2217-server:
+    version: "*"
+    override_path: ../../../
+  protocol_examples_common:
+    path: ${IDF_PATH}/examples/common_components/protocol_examples_common
+  usb_host_ch34x_vcp: "^2"
+  usb_host_cp210x_vcp: "^2"
+  usb_host_ftdi_vcp: "^2"
+  usb_host_vcp: "^1"
