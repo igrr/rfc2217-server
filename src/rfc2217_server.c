@@ -333,16 +333,13 @@ static void *tcp_receive_thread_fn(void *ctx /* rfc2217_server_t server */)
     server->telnet_mode = T_NORMAL;
 
     do {
-        len = recv(server->client_socket, server->tcp_rx_buffer, sizeof(server->tcp_rx_buffer) - 1, 0);
-
+        len = recv(server->client_socket, server->tcp_rx_buffer, sizeof(server->tcp_rx_buffer), 0);
 
         if (len < 0) {
             ESP_LOGE(TAG, "Error occurred during receiving: errno %d (%s)", errno, strerror(errno));
         } else if (len == 0) {
             ESP_LOGI(TAG, "Connection closed");
         } else {
-            server->tcp_rx_buffer[len] = 0; // Null-terminate whatever is received and treat it like a string
-
             ESP_LOGD(TAG, "Received %d bytes:", (int) len);
             ESP_LOG_BUFFER_HEX_LEVEL(TAG, server->tcp_rx_buffer, len, ESP_LOG_DEBUG);
             process_received_over_tcp(server, server->tcp_rx_buffer, len);
@@ -376,21 +373,24 @@ static void tcp_send(rfc2217_server_t server, const void *buf, size_t size)
 
 static void process_received_over_tcp(rfc2217_server_t server, const uint8_t *buf, size_t size)
 {
-    // fast path: if we are not in telnet mode and there is no IAC, just pass the data on to the callback
-    if (server->telnet_mode == T_NORMAL && memchr(buf, T_IAC, size) == NULL) {
-        if (server->config.on_data_received) {
-            server->config.on_data_received(server->config.ctx, buf, size);
-        }
-        return;
-    }
-
-    // otherwise, process the data byte by byte
+    // Buffer for collecting data bytes (non-telnet data)
+    uint8_t data_buffer[256];
+    size_t data_buffer_size = 0;
+    
     const uint8_t *end = buf + size;
-    for (; buf < end; ++buf) {
-        uint8_t c = *buf;
+    for (const uint8_t *ptr = buf; ptr < end; ++ptr) {
+        uint8_t c = *ptr;
+        
         switch (server->telnet_mode) {
         case T_NORMAL: {
             if (c == T_IAC) {
+                // If we have collected data, send it first
+                if (data_buffer_size > 0) {
+                    if (server->config.on_data_received) {
+                        server->config.on_data_received(server->config.ctx, data_buffer, data_buffer_size);
+                    }
+                    data_buffer_size = 0;
+                }
                 server->telnet_mode = T_GOT_IAC;
             } else if (server->collecting_suboption) {
                 if (server->suboption_size < sizeof(server->suboption)) {
@@ -401,14 +401,23 @@ static void process_received_over_tcp(rfc2217_server_t server, const uint8_t *bu
                     server->suboption_size = 0;
                 }
             } else {
-                if (server->config.on_data_received) {
-                    server->config.on_data_received(server->config.ctx, &c, 1);
+                // Collect data bytes for batch processing
+                if (data_buffer_size < sizeof(data_buffer)) {
+                    data_buffer[data_buffer_size++] = c;
+                } else {
+                    // Buffer full, send current data and start new buffer
+                    if (server->config.on_data_received) {
+                        server->config.on_data_received(server->config.ctx, data_buffer, data_buffer_size);
+                    }
+                    data_buffer[0] = c;
+                    data_buffer_size = 1;
                 }
             }
             break;
         }
         case T_GOT_IAC: {
             if (c == T_IAC) {
+                // Double IAC means literal IAC byte in data
                 if (server->collecting_suboption) {
                     if (server->suboption_size < sizeof(server->suboption)) {
                         server->suboption[server->suboption_size++] = c;
@@ -418,8 +427,16 @@ static void process_received_over_tcp(rfc2217_server_t server, const uint8_t *bu
                         server->suboption_size = 0;
                     }
                 } else {
-                    if (server->config.on_data_received) {
-                        server->config.on_data_received(server->config.ctx, &c, 1);
+                    // Add literal IAC to data buffer
+                    if (data_buffer_size < sizeof(data_buffer)) {
+                        data_buffer[data_buffer_size++] = c;
+                    } else {
+                        // Buffer full, send current data and start new buffer
+                        if (server->config.on_data_received) {
+                            server->config.on_data_received(server->config.ctx, data_buffer, data_buffer_size);
+                        }
+                        data_buffer[0] = c;
+                        data_buffer_size = 1;
                     }
                 }
                 server->telnet_mode = T_NORMAL;
@@ -448,6 +465,13 @@ static void process_received_over_tcp(rfc2217_server_t server, const uint8_t *bu
         }
         }
     }
+    
+    // Send any remaining collected data
+    if (data_buffer_size > 0) {
+        if (server->config.on_data_received) {
+            server->config.on_data_received(server->config.ctx, data_buffer, data_buffer_size);
+        }
+    }
 }
 
 
@@ -461,7 +485,39 @@ int rfc2217_server_send_data(rfc2217_server_t server, const uint8_t *data, size_
         ESP_LOGE(TAG, "TCP receive thread is not running");
         return -1;
     }
-    tcp_send(server, data, len);
+    
+    // Check if we need to escape any 0xff bytes
+    bool needs_escaping = false;
+    for (size_t i = 0; i < len; i++) {
+        if (data[i] == T_IAC) {
+            needs_escaping = true;
+            break;
+        }
+    }
+    
+    if (!needs_escaping) {
+        // No escaping needed, send data directly
+        tcp_send(server, data, len);
+    } else {
+        // Need to escape 0xff bytes
+        uint8_t escaped_buffer[512]; // Double the size to handle worst case
+        size_t escaped_size = 0;
+        
+        for (size_t i = 0; i < len && escaped_size < sizeof(escaped_buffer) - 1; i++) {
+            if (data[i] == T_IAC) {
+                // Escape IAC by doubling it
+                escaped_buffer[escaped_size++] = T_IAC;
+                escaped_buffer[escaped_size++] = T_IAC;
+            } else {
+                escaped_buffer[escaped_size++] = data[i];
+            }
+        }
+        
+        if (escaped_size > 0) {
+            tcp_send(server, escaped_buffer, escaped_size);
+        }
+    }
+    
     return 0;
 }
 
